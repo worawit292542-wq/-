@@ -1,0 +1,397 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0010; }
+
+  #app {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0010 0%, #1a0030 50%, #0a0010 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem 1rem; font-family: 'Segoe UI', sans-serif; color: white;
+    position: relative; overflow: hidden;
+  }
+
+  .star { position: absolute; border-radius: 50%; background: white; animation: twinkle 2s infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+
+  #countdown-section { text-align: center; z-index: 10; }
+  .subtitle { font-size: 14px; color: #d4a0ff; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; }
+  .main-title { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 2rem;
+    text-shadow: 0 0 30px #c084fc; }
+  
+  .countdown-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .time-box {
+    background: rgba(192,132,252,0.15); border: 1px solid rgba(192,132,252,0.4);
+    border-radius: 16px; padding: 20px 24px; min-width: 80px; text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  .time-num { font-size: 42px; font-weight: 700; color: #e9d5ff; line-height: 1; }
+  .time-label { font-size: 11px; color: #a78bfa; margin-top: 6px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .heart-msg { font-size: 18px; color: #f0abfc; margin-top: 1rem; animation: pulse-soft 2s infinite; }
+  @keyframes pulse-soft { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+  #birthday-section { display: none; text-align: center; z-index: 10; width: 100%; max-width: 680px; }
+  
+  .firework { position: fixed; pointer-events: none; }
+  .particle {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    animation: fly 1.5s ease-out forwards;
+  }
+  @keyframes fly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  .bday-title {
+    font-size: 36px; font-weight: 700;
+    background: linear-gradient(90deg, #f0abfc, #818cf8, #f0abfc);
+    -webkit-backSground-clip: text; -webkit-text-fill-color: transparent;
+    background-size: 200%; animation: shimmer 3s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+  @keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+  
+  .bday-sub { font-size: 16px; color: #d4a0ff; margin-bottom: 1.5rem; }
+
+  .heart-grid {
+    display: grid; gap: 6px; justify-content: center; margin: 1.5rem auto;
+    max-width: 560px;
+  }
+  .heart-cell {
+    width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+    border: 2px solid rgba(192,132,252,0.5);
+    animation: squeeze-in 0.6s ease-out backwards;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .heart-cell:hover { transform: scale(1.15); }
+  .heart-cell img { width: 100%; height: 100%; object-fit: cover; }
+  .heart-cell.empty { background: transparent; border: none; }
+
+  @keyframes squeeze-in { 0%{transform:scaleX(0) scaleY(0.8);opacity:0} 60%{transform:scaleX(1.15) scaleY(1.05)} 100%{transform:scaleX(1) scaleY(1);opacity:1} }
+
+  .wish-card {
+    background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.3);
+    border-radius: 20px; padding: 24px 28px; margin: 1.5rem auto; max-width: 480px;
+    backdrop-filter: blur(10px);
+  }
+  .wish-text { font-size: 20px; line-height: 1.7; color: #f3e8ff; }
+  .wish-sig { font-size: 14px; color: #c084fc; margin-top: 12px; }
+
+  .floating-hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; }
+  .fheart {
+    position: absolute; bottom: -50px;
+    width: 48px; height: 48px; border-radius: 50%;
+    overflow: hidden; animation: float-up 4s ease-in forwards;
+    opacity: 0.8; border: 2px solid rgba(192,132,252,0.4);
+  }
+  .fheart img { width: 100%; height: 100%; object-fit: cover; }
+  @keyframes float-up {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+  }
+
+  .audio-btn {
+    background: rgba(192,132,252,0.2); border: 1px solid rgba(192,132,252,0.5);
+    color: #e9d5ff; padding: 10px 24px; border-radius: 50px; font-size: 14px;
+    cursor: pointer; margin-top: 1rem; transition: all 0.3s;
+  }
+  .audio-btn:hover { background: rgba(192,132,252,0.4); }
+
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    animation: confetti-fall linear forwards;
+    pointer-events: none;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  input[type="date"], input[type="text"] {
+    background: rgba(192,132,252,0.15); border: 1px solid rgba(192,132,252,0.4);
+    color: #e9d5ff; border-radius: 12px; padding: 10px 16px; font-size: 15px;
+    outline: none; width: 220px; margin: 6px;
+  }
+  .setup-card {
+    background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.3);
+    border-radius: 20px; padding: 28px; text-align: center; max-width: 400px; margin: 0 auto;
+  }
+  .setup-card h2 { font-size: 20px; color: #f3e8ff; margin-bottom: 1rem; }
+  .setup-card p { font-size: 13px; color: #a78bfa; margin-bottom: 1.5rem; }
+  .go-btn {
+    background: linear-gradient(135deg, #c084fc, #818cf8);
+    border: none; color: white; padding: 12px 32px; border-radius: 50px;
+    font-size: 16px; cursor: pointer; margin-top: 1rem; font-weight: 600;
+  }
+</style>
+
+<div id="app">
+  <div id="stars-container"></div>
+  <div id="floating-hearts-container" class="floating-hearts"></div>
+
+  <div id="setup-section" style="z-index:10;width:100%;max-width:400px;">
+    <div class="setup-card">
+      <h2>🎂 ตั้งค่าเซอร์ไพรส์วันเกิด</h2>
+      <p>ใส่ชื่อแฟน: เนย และวันเกิด: 29/05/2026 เพื่อเริ่มนับถอยหลัง</p>
+      <div>
+        <input type="text" id="lover-name" placeholder="ชื่อแฟน" />
+      </div>
+      <div>
+        <input type="date" id="bday-input" />
+      </div>
+      <button class="go-btn" onclick="startCountdown()">เริ่มเลย 💜</button>
+    </div>
+  </div>
+
+  <div id="countdown-section" style="display:none;">
+    <p class="subtitle">นับถอยหลังถึง</p>
+    <h1 class="main-title" id="cd-title">วันเกิด 🎂</h1>
+    <div class="countdown-grid">
+      <div class="time-box"><div class="time-num" id="days">00</div><div class="time-label">วัน</div></div>
+      <div class="time-box"><div class="time-num" id="hours">00</div><div class="time-label">ชั่วโมง</div></div>
+      <div class="time-box"><div class="time-num" id="minutes">00</div><div class="time-label">นาที</div></div>
+      <div class="time-box"><div class="time-num" id="seconds">00</div><div class="time-label">วินาที</div></div>
+    </div>
+    <p class="heart-msg">💜 รอวันนั้นอยู่นะ 💜</p>
+  </div>
+
+  <div id="birthday-section">
+    <div class="bday-title" id="bday-title">🎉 สุขสันต์วันเกิด! 🎉</div>
+    <div class="bday-sub" id="bday-sub">วันพิเศษที่สุดของปีมาถึงแล้ว ✨</div>
+    <div class="heart-grid" id="heart-grid"></div>
+    <div class="wish-card">
+      <div class="wish-text" id="wish-text">
+        ขอให้วันเกิดปีนี้เต็มไปด้วยความสุข<br>
+        มีแต่เรื่องดีๆ เข้ามาในชีวิต<br>
+        รักและห่วงใยเสมอนะ 💜
+      </div>
+      <div class="wish-sig" id="wish-sig">— จากคนที่รักเธอที่สุด 💜</div>
+    </div>
+    <button class="audio-btn" onclick="toggleMusic()" id="music-btn">🎵 เปิดเพลงวันเกิด</button>
+  </div>
+</div>
+
+<audio id="bday-audio" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const photos = [
+  './1.jpg',
+  './2.jpg',
+  './3.jpg',
+  './4.jpg',
+  './5.jpg',
+  './6.jpg',
+  './7.jpg',
+  './8.jpg',
+  './9.jpg',
+  './10.jpg',
+];
+
+const heartPattern = [
+  [0,1,1,0,0,1,1,0],
+  [1,1,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1,1],
+  [0,1,1,1,1,1,1,0],
+  [0,0,1,1,1,1,0,0],
+  [0,0,0,1,1,0,0,0],
+];
+
+let bdayDate = null;
+let countInterval = null;
+let musicPlaying = false;
+let birthdayShown = false;
+
+function makeStars() {
+  const c = document.getElementById('stars-container');
+  for(let i=0;i<80;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*3+1;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${1.5+Math.random()*2}s;`;
+    c.appendChild(s);
+  }
+}
+
+function startCountdown() {
+  const name = document.getElementById('lover-name').value.trim();
+  const dateVal = document.getElementById('bday-input').value;
+  
+  if (name !== 'เนย') { alert('ชื่อแฟนต้องเป็น "เนย" นะจ๊ะ 💜'); return; }
+  if (dateVal !== '2026-05-29') { alert('วันเกิดต้องเป็น 29 พฤษภาคม 2026 นะจ๊ะ 💜'); return; }
+  
+  const [y,m,d] = dateVal.split('-').map(Number);
+  const now = new Date();
+  bdayDate = new Date(now.getFullYear(), m-1, d);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (bdayDate < today) {
+    bdayDate.setFullYear(now.getFullYear()+1);
+  }
+
+  document.getElementById('cd-title').textContent = `วันเกิด ${name} 🎂`;
+  document.getElementById('bday-title').innerHTML = `🎉 สุขสันต์วันเกิด ${name}! 🎉`;
+  document.getElementById('bday-sub').textContent = `วันพิเศษที่สุดของปีมาถึงแล้ว ✨`;
+
+  document.getElementById('setup-section').style.display = 'none';
+
+  const diff = bdayDate - new Date();
+  if (diff <= 0) {
+    showBirthday();
+  } else {
+    document.getElementById('countdown-section').style.display = 'block';
+    tick();
+    countInterval = setInterval(tick, 1000);
+  }
+}
+
+function tick() {
+  const now = new Date();
+  let diff = bdayDate - now;
+  if (diff <= 0) {
+    clearInterval(countInterval);
+    document.getElementById('countdown-section').style.display = 'none';
+    showBirthday();
+    return;
+  }
+  const days = Math.floor(diff/86400000);
+  diff %= 86400000;
+  const hrs = Math.floor(diff/3600000);
+  diff %= 3600000;
+  const min = Math.floor(diff/60000);
+  const sec = Math.floor((diff%60000)/1000);
+  document.getElementById('days').textContent = String(days).padStart(2,'0');
+  document.getElementById('hours').textContent = String(hrs).padStart(2,'0');
+  document.getElementById('minutes').textContent = String(min).padStart(2,'0');
+  document.getElementById('seconds').textContent = String(sec).padStart(2,'0');
+}
+
+function showBirthday() {
+  if (birthdayShown) return;
+  birthdayShown = true;
+  
+  const section = document.getElementById('birthday-section');
+  section.style.display = 'block';
+  
+  buildHeartGrid();
+  launchFireworks();
+  startFloatingHearts();
+  startConfetti();
+  autoPlayMusic();
+}
+
+function buildHeartGrid() {
+  const grid = document.getElementById('heart-grid');
+  grid.style.gridTemplateColumns = 'repeat(8, 72px)';
+  
+  let photoIdx = 0;
+  heartPattern.forEach((row, ri) => {
+    row.forEach((cell, ci) => {
+      const div = document.createElement('div');
+      if (cell === 1) {
+        div.className = 'heart-cell';
+        div.style.animationDelay = (ri*0.1 + ci*0.05) + 's';
+        const img = document.createElement('img');
+        img.src = photos[photoIdx % photos.length];
+        img.alt = 'memory';
+        div.appendChild(img);
+        photoIdx++;
+      } else {
+        div.className = 'heart-cell empty';
+      }
+      grid.appendChild(div);
+    });
+  });
+}
+
+function launchFireworks() {
+  const colors = ['#f0abfc','#818cf8','#fbbf24','#34d399','#f87171','#c084fc'];
+  function shoot() {
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    fw.style.left = Math.random()*100+'vw';
+    fw.style.top = Math.random()*60+'vh';
+    document.body.appendChild(fw);
+    for(let i=0;i<16;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const angle = (i/16)*360;
+      const dist = 60+Math.random()*80;
+      p.style.cssText = `background:${colors[Math.floor(Math.random()*colors.length)]};--tx:${Math.cos(angle*Math.PI/180)*dist}px;--ty:${Math.sin(angle*Math.PI/180)*dist}px;animation-duration:${0.8+Math.random()*0.7}s;`;
+      fw.appendChild(p);
+    }
+    setTimeout(()=>fw.remove(), 2000);
+  }
+  for(let i=0;i<8;i++) setTimeout(shoot, i*400);
+  setInterval(()=>{ if(Math.random()>0.3) shoot(); }, 1200);
+}
+
+function startFloatingHearts() {
+  const container = document.getElementById('floating-hearts-container');
+  function addHeart(){
+    const h = document.createElement('div');
+    h.className = 'fheart';
+    const img = document.createElement('img');
+    img.src = photos[Math.floor(Math.random()*photos.length)];
+    img.alt = 'floating memory';
+    h.appendChild(img);
+    h.style.left = Math.random()*100+'%';
+    h.style.animationDuration = (3+Math.random()*3)+'s';
+    h.style.animationDelay = Math.random()*2+'s';
+    container.appendChild(h);
+    setTimeout(()=>h.remove(), 6000);
+  }
+  for(let i=0;i<10;i++) setTimeout(addHeart, i*300);
+  setInterval(addHeart, 600);
+}
+
+function startConfetti(){
+  const colors=['#f0abfc','#818cf8','#fbbf24','#34d399','#f87171'];
+  function drop(){
+    const c=document.createElement('div');
+    c.className='confetti-piece';
+    c.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()}s;`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),5000);
+  }
+  for(let i=0;i<30;i++) setTimeout(drop,i*100);
+  setInterval(()=>{for(let i=0;i<3;i++) drop();},1500);
+}
+
+function autoPlayMusic(){
+  const notes=[261,293,329,349,392,440,493,523];
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const melody=[523,493,523,349,440,392,0,349,392,440,523,261,0,329,392,440,493,523,587,523];
+    const dur=0.3;
+    melody.forEach((freq,i)=>{
+      if(!freq) return;
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.frequency.value=freq;
+      osc.type='sine';
+      gain.gain.setValueAtTime(0,ctx.currentTime+i*dur);
+      gain.gain.linearRampToValueAtTime(0.18,ctx.currentTime+i*dur+0.05);
+      gain.gain.linearRampToValueAtTime(0,ctx.currentTime+i*dur+dur-0.05);
+      osc.start(ctx.currentTime+i*dur);
+      osc.stop(ctx.currentTime+i*dur+dur);
+    });
+    document.getElementById('music-btn').textContent='🎵 กำลังเล่นเพลง';
+    musicPlaying=true;
+  } catch(e){}
+}
+
+function toggleMusic(){
+  const notes=[523,493,523,349,440,392,0,349,392,440,523,261,0,329,392,440,493,523,587,523];
+  if(musicPlaying){
+    musicPlaying=false;
+    document.getElementById('music-btn').textContent='🎵 เปิดเพลงวันเกิด';
+  } else {
+    autoPlayMusic();
+  }
+}
+
+makeStars();
+</script>
